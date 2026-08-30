@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <!-- Chosen Palette: Celestial Midnight Gold (Background Dark Navy #0B1021, Royal Navy #16213E, Card Translucent #1B263B, Accent Gold #E9C46A, Sparkle Yellow #FFB703, Soft Text #F8F9FA) -->
+    <!-- Application Structure Plan:
+        1. Canvas Background Layer: Interactive HTML5 Canvas for twinkling celestial stars, shooting stars, and gold cosmic dust inspired by Sitara's astronomical charts in Jaadugar.
+        2. Mobile-First Responsive Navigation Bar: Glassmorphic top navigation with desktop tab buttons and a touch-friendly mobile drawer toggle menu.
+        3. Hero Banner: Responsive title banner featuring dual-cultural framing (Japan Culture + Jaadugar Astronomical Motif) with dynamic stat highlights.
+        4. Interactive Section 1 (Awal Mula & Anime Transmedia): Explores how anime acts as a transmedia gateway with a Chart.js Donut chart illustrating cultural entry points.
+        5. Interactive Section 2 (Sinematografi Atmosferik & Visualizer Canvas): Atmospheric mood selector equipped with a live Canvas Soundwave visualizer simulating ambient sounds (Rain, Tokyo Night, Temple, School).
+        6. Interactive Section 3 (Dualitas Tradisi & Modernitas): Structural breakdown of Japan's dual identity with a Chart.js Stacked Horizontal Bar Chart comparing traditional and modern facets.
+        7. Interactive Section 4 (Destinasi, Musim & Kuliner Explorer): Interactive travel bucket list with LocalStorage support, 4-city tab switcher (Tokyo, Kyoto, Osaka, Sapporo), dynamic season selector (Haru, Natsu, Aki, Fuyu), and Chart.js Seasonal Vibrancy chart.
+        8. Interactive Section 5 (Refleksi Transkultural & Astrolabe Interactive Canvas): Concluding reflection bridging Sitara's stargazing curiosity with Japanese exploration, featuring a touch/drag rotate Canvas Astrolabe.
+        WHY THIS STRUCTURE: Optimizes readability and navigation seamlessly across all screen sizes (mobile touch screens to wide desktop monitors) while turning linear commentary into an active, multi-sensory interactive story hub.
+    -->
+    <!-- Visualization & Content Choices:
+        1. Celestial Starfield Background -> Canvas 2D API (No SVG used) -> Touch-safe starfield animation with twinkling & meteor trails -> Vanilla JS Canvas.
+        2. Entry Point Breakdown -> Chart.js Donut Chart -> Touch & mouse hover tooltips with 16-char label truncation -> Chart.js CDN.
+        3. Atmosphere Visualizer -> Canvas 2D Animated Waveform -> Canvas wave lines reacting dynamically to ambient mood switching -> Vanilla JS Canvas.
+        4. Traditional vs Modern Spectrum -> Chart.js Stacked Horizontal Bar Chart -> Mobile-friendly axis formatting -> Chart.js CDN.
+        5. Seasonal Cultural Vibrancy -> Chart.js Radar Chart -> Visualizes cultural attraction metrics across 4 Japanese seasons -> Chart.js CDN.
+        6. Astrolabe Celestial Engine -> Canvas 2D Dynamic Renderer -> Rotates automatically and reacts to touch/drag cursor interaction -> Vanilla JS Canvas.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Jepang: Kenapa Aku Suka Semuanya? | Celestial Jaadugar Blog</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                screens: {
+                    'xs': '380px',
+                    'sm': '640px',
+                    'md': '768px',
+                    'lg': '1024px',
+                    'xl': '1280px',
+                },
+                extend: {
+                    colors: {
+                        celestial: {
+                            deep: '#0B1021',
+                            night: '#16213E',
+                            card: '#1B263B',
+                            gold: '#E9C46A',
+                            brightGold: '#FFB703',
+                            amber: '#F4A261',
+                            muted: '#8D99AE',
+                            light: '#F8F9FA'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Georgia', 'Cambria', 'serif'],
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Custom Embedded Styles for Precise Celestial Effects & Responsive Canvas Containment */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #0B1021;
+            color: #F8F9FA;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Starry Canvas Background Positioning */
+        #skyCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Content Layer above Canvas */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Chart Container Styling enforcing prompt guidelines */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 380px;
+        }
+        @media (min-width: 480px) {
+            .chart-container {
+                height: 290px;
+            }
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 330px;
+            }
+        }
+
+        /* Glassmorphism Card Aesthetics */
+        .jaadugar-card {
+            background: rgba(27, 38, 59, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(233, 196, 106, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .jaadugar-card-gold {
+            background: rgba(22, 33, 62, 0.92);
+            border: 1px solid rgba(255, 183, 3, 0.45);
+            box-shadow: 0 0 20px rgba(233, 196, 106, 0.18);
+        }
+
+        /* Ornate Gold Border Motif simulating Mongolian Ulzii / Astrolabe Line */
+        .gold-ornament-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #E9C46A 50%, transparent 100%);
+        }
+
+        .gold-text-glow {
+            text-shadow: 0 0 10px rgba(255, 183, 3, 0.5);
+        }
+
+        /* Smooth Tab Display Switch */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.35s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Custom Mobile Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B1021;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E9C46A;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFB703;
+        }
+
+        /* Hamburger Animation */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        .menu-open .line-1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .menu-open .line-2 {
+            opacity: 0;
+        }
+        .menu-open .line-3 {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased leading-relaxed text-celestial-light">
+
+    <!-- Interactive HTML5 Sky Canvas for Twinkling Stars & Celestial Dust -->
+    <canvas id="skyCanvas"></canvas>
+
+    <!-- Main Content Layer -->
+    <div class="content-layer min-h-screen flex flex-col justify-between">
+
+        <!-- Top Navigation Header -->
+        <header class="sticky top-0 z-50 jaadugar-card border-b border-celestial-gold/30 px-3 sm:px-6 py-3">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                
+                <!-- Logo & Brand Title -->
+                <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchTab('overview')">
+                    <span class="text-xl sm:text-2xl">🌙</span>
+                    <div>
+                        <h1 class="font-serif font-bold text-base sm:text-lg md:text-xl text-celestial-gold tracking-wide leading-tight">
+                            天幕のジャードゥガル
+                        </h1>
+                        <span class="text-[10px] sm:text-xs font-sans text-celestial-light opacity-75 block">
+                            Celestial Japan Explorer
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-1.5 text-xs md:text-sm font-medium">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn px-3 py-1.5 rounded-full transition-all duration-300 bg-celestial-gold text-celestial-deep font-bold shadow-md">
+                        🌸 Beranda
+                    </button>
+                    <button onclick="switchTab('anime')" id="nav-anime" class="nav-btn px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-celestial-gold/20 text-celestial-light">
+                        🎌 Anime & Transmedia
+                    </button>
+                    <button onclick="switchTab('culture')" id="nav-culture" class="nav-btn px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-celestial-gold/20 text-celestial-light">
+                        🍜 Tradisi & Modern
+                    </button>
+                    <button onclick="switchTab('travel')" id="nav-travel" class="nav-btn px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-celestial-gold/20 text-celestial-light">
+                        🗺️ Destinasi & Musim
+                    </button>
+                    <button onclick="switchTab('reflection')" id="nav-reflection" class="nav-btn px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-celestial-gold/20 text-celestial-light">
+                        📜 Refleksi Kosmik
+                    </button>
+                </nav>
+
+                <!-- Right Header Actions (Sky Density + Mobile Menu Trigger) -->
+                <div class="flex items-center space-x-2">
+                    <div class="hidden sm:flex items-center space-x-1 text-[11px] text-celestial-muted bg-celestial-night/80 px-2 py-1 rounded-lg border border-celestial-gold/20">
+                        <span>✨ Bintang:</span>
+                        <button onclick="adjustStarDensity('low')" class="px-1.5 py-0.5 rounded text-celestial-gold hover:bg-celestial-gold/20">Redup</button>
+                        <span>|</span>
+                        <button onclick="adjustStarDensity('high')" class="px-1.5 py-0.5 rounded text-celestial-brightGold hover:bg-celestial-gold/20 font-bold">Terang</button>
+                    </div>
+
+                    <!-- Mobile Hamburger Button -->
+                    <button onclick="toggleMobileMenu()" id="hamburgerBtn" aria-label="Menu Mobile" class="lg:hidden p-2 rounded-lg bg-celestial-night border border-celestial-gold/30 text-celestial-gold focus:outline-none">
+                        <div class="w-5 h-4 flex flex-col justify-between items-center">
+                            <span class="hamburger-line line-1 w-full h-0.5 bg-celestial-gold rounded"></span>
+                            <span class="hamburger-line line-2 w-full h-0.5 bg-celestial-gold rounded"></span>
+                            <span class="hamburger-line line-3 w-full h-0.5 bg-celestial-gold rounded"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Slide-Down Drawer Navigation -->
+            <div id="mobileDrawer" class="hidden lg:hidden pt-3 pb-2 px-2 border-t border-celestial-gold/20 mt-3 space-y-2">
+                <button onclick="switchTab('overview'); toggleMobileMenu()" id="mob-nav-overview" class="mob-nav-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold bg-celestial-gold text-celestial-deep flex items-center gap-2">
+                    <span>🌸</span> Beranda Eksplorasi
+                </button>
+                <button onclick="switchTab('anime'); toggleMobileMenu()" id="mob-nav-anime" class="mob-nav-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-celestial-night text-celestial-light flex items-center gap-2 border border-celestial-gold/10">
+                    <span>🎌</span> Anime & Transmedia
+                </button>
+                <button onclick="switchTab('culture'); toggleMobileMenu()" id="mob-nav-culture" class="mob-nav-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-celestial-night text-celestial-light flex items-center gap-2 border border-celestial-gold/10">
+                    <span>🍜</span> Dualitas Tradisi & Modern
+                </button>
+                <button onclick="switchTab('travel'); toggleMobileMenu()" id="mob-nav-travel" class="mob-nav-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-celestial-night text-celestial-light flex items-center gap-2 border border-celestial-gold/10">
+                    <span>🗺️</span> Destinasi, Musim & Kuliner
+                </button>
+                <button onclick="switchTab('reflection'); toggleMobileMenu()" id="mob-nav-reflection" class="mob-nav-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-celestial-night text-celestial-light flex items-center gap-2 border border-celestial-gold/10">
+                    <span>📜</span> Refleksi Kosmik & Astrolabe
+                </button>
+                
+                <div class="flex items-center justify-between pt-2 px-2 text-xs text-celestial-muted sm:hidden">
+                    <span>Intensitas Bintang Langit:</span>
+                    <div class="flex gap-2">
+                        <button onclick="adjustStarDensity('low')" class="px-2 py-1 rounded bg-celestial-night text-celestial-gold border border-celestial-gold/30">Redup</button>
+                        <button onclick="adjustStarDensity('high')" class="px-2 py-1 rounded bg-celestial-night text-celestial-brightGold border border-celestial-gold/30">Terang</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Responsive Content Wrapper -->
+        <main class="flex-grow max-w-5xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+
+            <!-- HERO INTRO BANNER (Sticky Anchor for Desktop & Mobile) -->
+            <section class="jaadugar-card rounded-2xl p-5 sm:p-8 text-center relative overflow-hidden border border-celestial-gold/40">
+                <div class="hidden xs:block absolute top-2.5 left-4 text-[10px] sm:text-xs font-serif text-celestial-gold/70 tracking-widest uppercase">
+                    ✦ Inspiring Celestial Narrative ✦
+                </div>
+                <div class="hidden xs:block absolute top-2.5 right-4 text-[10px] sm:text-xs font-serif text-celestial-gold/70 tracking-widest">
+                    Sitara's Stargazing Edition
+                </div>
+
+                <div class="my-2 sm:my-4">
+                    <span class="inline-block bg-celestial-gold/15 text-celestial-brightGold text-[11px] sm:text-xs font-semibold px-3 py-1 rounded-full border border-celestial-brightGold/30 mb-2 sm:mb-3">
+                        Apresiasi Budaya Transkultural & Estetika Visual
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl md:text-5xl font-serif font-extrabold text-celestial-light tracking-tight gold-text-glow leading-tight">
+                        Jepang: Kenapa Aku Suka Semuanya?
+                    </h2>
+                    <p class="mt-2.5 max-w-2xl mx-auto text-xs sm:text-sm md:text-base text-celestial-muted leading-relaxed">
+                        Menjelajahi perpaduan harmonis antara pesona modernitas metropolit, keheningan tradisi leluhur, dan keajaiban atmosferik yang dipantik melalui sinematografi anime.
+                    </p>
+                </div>
+
+                <div class="gold-ornament-line my-4 sm:my-6"></div>
+
+                <!-- Dynamic Quick Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 text-center">
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-celestial-night/70 border border-celestial-gold/20">
+                        <div class="text-[10px] sm:text-xs text-celestial-muted uppercase tracking-wider">Pintu Masuk</div>
+                        <div class="text-xs sm:text-base md:text-lg font-bold text-celestial-brightGold mt-0.5">Media Anime</div>
+                    </div>
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-celestial-night/70 border border-celestial-gold/20">
+                        <div class="text-[10px] sm:text-xs text-celestial-muted uppercase tracking-wider">Kutub Budaya</div>
+                        <div class="text-xs sm:text-base md:text-lg font-bold text-celestial-gold mt-0.5">Kuil & Neon</div>
+                    </div>
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-celestial-night/70 border border-celestial-gold/20">
+                        <div class="text-[10px] sm:text-xs text-celestial-muted uppercase tracking-wider">Destinasi Favorit</div>
+                        <div class="text-xs sm:text-base md:text-lg font-bold text-celestial-brightGold mt-0.5">Tokyo - Kyoto</div>
+                    </div>
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-celestial-night/70 border border-celestial-gold/20">
+                        <div class="text-xs text-celestial-muted uppercase tracking-wider">Motif Visual</div>
+                        <div class="text-xs sm:text-base md:text-lg font-bold text-celestial-gold mt-0.5">Jaadugar Sky</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TAB 1: OVERVIEW & AWAL MULA ================= -->
+            <div id="tab-overview" class="tab-content active space-y-6 sm:space-y-8">
+                
+                <!-- Section Introduction Paragraph -->
+                <section class="jaadugar-card rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-celestial-gold flex items-center gap-2 mb-2.5">
+                        <span>🌸</span> Awal Mula Ketertarikan: Gerbang Transmedia Melalui Anime
+                    </h3>
+                    <p class="text-celestial-light/90 leading-relaxed text-xs sm:text-sm md:text-base mb-3.5">
+                        Halaman awal ini mengantarkan pembaca pada titik mula bagaimana sebuah apresiasi budaya lahir. Jepang adalah salah satu negara yang memiliki daya tarik luar biasa unik. Pesonanya terpancar mulai dari lanskap perkotaannya yang serba modern, pemandangan alamnya yang memikat, hingga budaya tradisionalnya yang masih terasa sangat kuat di tengah arus zaman. Ketertarikan ini tidak tumbuh begitu saja secara tiba-tiba, melainkan dipantik oleh media naratif visual: anime.
+                    </p>
+                    <div class="p-3 sm:p-4 rounded-lg bg-celestial-night/90 border-l-4 border-celestial-gold text-xs sm:text-sm text-celestial-muted italic">
+                        "Semakin banyak hal yang saya lihat melalui layar visual anime, semakin besar pula rasa penasaran yang tumbuh untuk memahami Jepang secara langsung."
+                    </div>
+                </section>
+
+                <!-- Interactive Analysis: Chart + Qualitative Text Block -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                    
+                    <!-- Chart Block -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold mb-1">
+                                Komposisi Elemen Budaya yang Dikenal via Anime
+                            </h4>
+                            <p class="text-[11px] sm:text-xs text-celestial-muted mb-3">
+                                Visualisasi porsi aspek kehidupan masyarakat Jepang yang pertama kali dipelajari melalui media animasi interaktif.
+                            </p>
+                        </div>
+
+                        <!-- Chart Container meeting prompt criteria -->
+                        <div class="chart-container relative w-full max-w-xl mx-auto h-[250px] sm:h-[290px]">
+                            <canvas id="animeGatewayChart"></canvas>
+                        </div>
+
+                        <p class="text-[11px] text-center text-celestial-muted mt-2 italic">
+                            Sentuh atau sorot sektor lingkaran untuk melihat detail persentase.
+                        </p>
+                    </div>
+
+                    <!-- Qualitative Insights Card -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold mb-2">
+                                Pembelajaran Kultural Lintas Media
+                            </h4>
+                            <p class="text-xs sm:text-sm text-celestial-light/90 leading-relaxed">
+                                Anime berfungsi sebagai kacamata awal yang memperkenalkan tata cara kehidupan sosial Jepang secara bertahap dan alami:
+                            </p>
+                        </div>
+
+                        <ul class="space-y-2.5 text-xs sm:text-sm">
+                            <li class="p-2.5 sm:p-3 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-start gap-2.5">
+                                <span class="text-base sm:text-lg">🗣️</span>
+                                <div>
+                                    <strong class="text-celestial-brightGold block">Tata Bahasa & Salam Sehari-hari</strong>
+                                    Mengenal ungkapan sopan, salam perpisahan seperti <em>"Jaa, mata ne!"</em>, hingga intonasi penghormatan (*ojigi*).
+                                </div>
+                            </li>
+                            <li class="p-2.5 sm:p-3 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-start gap-2.5">
+                                <span class="text-base sm:text-lg">🍱</span>
+                                <div>
+                                    <strong class="text-celestial-brightGold block">Ragam Kuliner Otentik</strong>
+                                    Memahami estetika penyajian makanan dari kedai ramen pinggir jalan hingga bento sekolah dan jajanan festival.
+                                </div>
+                            </li>
+                            <li class="p-2.5 sm:p-3 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-start gap-2.5">
+                                <span class="text-base sm:text-lg">⛩️</span>
+                                <div>
+                                    <strong class="text-celestial-brightGold block">Kebiasaan Kultural & Musim</strong>
+                                    Mengamati bagaimana pergantian musim dirayakan melalui ritual *hanami* saat sakura mekar atau festival *matsuri*.
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="pt-1 text-right">
+                            <button onclick="switchTab('anime')" class="text-xs text-celestial-gold hover:text-celestial-brightGold font-semibold underline inline-flex items-center gap-1">
+                                Jelajahi Kedalaman Sinematografi Anime →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 2: ANIME & SINEMATOGRAFI ================= -->
+            <div id="tab-anime" class="tab-content space-y-6 sm:space-y-8">
+                
+                <!-- Section Introduction Paragraph -->
+                <section class="jaadugar-card rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-celestial-gold flex items-center gap-2 mb-2.5">
+                        <span>🎌</span> Anime Lebih dari Sekadar Hiburan: Sinematografi Atmosferik
+                    </h3>
+                    <p class="text-celestial-light/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                        Seksi ini mengeksplorasi alasan mengapa anime memiliki daya gugah yang begitu mendalam. Bagi sebagian orang, anime mungkin hanya dianggap sebagai media kartun hiburan semata. Namun, anime memiliki kapasitas penceritaan yang jauh lebih luas. Bagian terkuat dari sinematografi anime adalah kemampuannya membangun **suasana (atmosfer ruang)**—mulai dari derai hujan di pemukiman hingga keheningan malam kota besar—yang membuat latar budaya Jepang terasa begitu hidup.
+                    </p>
+                </section>
+
+                <!-- Interactive Atmosphere Switcher + Soundwave Canvas Visualizer -->
+                <div class="jaadugar-card rounded-xl p-4 sm:p-6 space-y-5">
+                    <div class="text-center max-w-xl mx-auto">
+                        <h4 class="text-base sm:text-lg font-serif font-bold text-celestial-brightGold">
+                            Simulator Atmosfer Ruang & Gelombang Suara (Ambient Visualizer)
+                        </h4>
+                        <p class="text-[11px] sm:text-xs text-celestial-muted mt-1">
+                            Pilih nuansa suasana di bawah ini untuk mengamati respons grafik gelombang ruang dan emosi naratif sinematik.
+                        </p>
+                    </div>
+
+                    <!-- Mood Switcher Grid Buttons -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="changeAtmosphere('night')" id="atmo-btn-night" class="atmo-btn px-3 py-2 rounded-lg bg-celestial-gold text-celestial-deep text-xs font-bold transition-all shadow-md text-center">
+                            🌙 Malam Tokyo
+                        </button>
+                        <button onclick="changeAtmosphere('rain')" id="atmo-btn-rain" class="atmo-btn px-3 py-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold transition-all text-center">
+                            🌧️ Hujan Pemukiman
+                        </button>
+                        <button onclick="changeAtmosphere('school')" id="atmo-btn-school" class="atmo-btn px-3 py-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold transition-all text-center">
+                            🏫 Senja Sekolah
+                        </button>
+                        <button onclick="changeAtmosphere('temple')" id="atmo-btn-temple" class="atmo-btn px-3 py-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold transition-all text-center">
+                            ⛩️ Kuil Kyoto
+                        </button>
+                    </div>
+
+                    <!-- Live Soundwave Canvas Visualizer Box -->
+                    <div class="relative w-full h-16 bg-celestial-deep/80 rounded-lg overflow-hidden border border-celestial-gold/30 flex items-center justify-center">
+                        <canvas id="waveCanvas" class="w-full h-full"></canvas>
+                        <div class="absolute text-[10px] text-celestial-gold/70 bottom-1 right-2 tracking-wider">
+                            ✦ AMBIENT AUDIO WAVE SIMULATION ✦
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Atmosphere Display Box -->
+                    <div id="atmosphereBox" class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-celestial-night via-celestial-card to-celestial-deep border border-celestial-gold/40 transition-all duration-500">
+                        <div class="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+                            <div class="w-full md:w-1/3 text-center">
+                                <div id="atmoIcon" class="text-5xl sm:text-6xl mb-2 animate-bounce">🏙️</div>
+                                <span id="atmoBadge" class="inline-block px-3 py-1 text-[11px] sm:text-xs rounded-full bg-celestial-brightGold/20 text-celestial-brightGold border border-celestial-brightGold/40 font-semibold">
+                                    Vibe: Night Cityscape
+                                </span>
+                            </div>
+                            <div class="w-full md:w-2/3 space-y-2.5">
+                                <h5 id="atmoTitle" class="text-lg sm:text-xl font-serif font-bold text-celestial-gold">
+                                    Pencahayaan Neon & Keheningan Malam
+                                </h5>
+                                <p id="atmoDesc" class="text-xs sm:text-sm text-celestial-light/90 leading-relaxed">
+                                    Pantulan lampu neon pada aspal basah, gemerlap papan reklame tinggi, serta sunyinya gang-gang kecil di Tokyo menciptakan kontras visual yang memikat dan memicu imajinasi eksplorasi malam.
+                                </p>
+                                <blockquote id="atmoQuote" class="text-[11px] sm:text-xs text-celestial-muted italic border-l-2 border-celestial-amber pl-3 pt-0.5">
+                                    "Pemandangan jalanan Jepang pada malam hari mampu menghadirkan perenungan mendalam mengenai dinamika kota dan keheningan pribadi."
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jaadugar Anime Integration Focus Box -->
+                <div class="jaadugar-card-gold rounded-xl p-4 sm:p-6 relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                        <div class="text-3xl sm:text-4xl text-celestial-brightGold flex-shrink-0">✨</div>
+                        <div>
+                            <h4 class="text-base sm:text-lg font-serif font-bold text-celestial-brightGold">
+                                Sentuhan Visual: Tenmaku no Jaadugar (A Witch in Mongolia)
+                            </h4>
+                            <p class="text-xs sm:text-sm text-celestial-light/90 mt-1 leading-relaxed">
+                                Sebagaimana serial adaptasi <em>Tenmaku no Jaadugar</em> karya Tomato Soup (Studio Science SARU) yang dipandu Naoko Yamada, seni latar belakang bertekstur kain/pergamen dan astronomi bintang tokoh Sitara membuktikan bahwa animasi mampu mengangkat narasi sejarah dunia yang kompleks secara estetis.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 3: BUDAYA & DUALITAS ================= -->
+            <div id="tab-culture" class="tab-content space-y-6 sm:space-y-8">
+                
+                <!-- Section Introduction Paragraph -->
+                <section class="jaadugar-card rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-celestial-gold flex items-center gap-2 mb-2.5">
+                        <span>🍜</span> Budaya Jepang: Perpaduan Tradisionalitas & Modernitas Futuristik
+                    </h3>
+                    <p class="text-celestial-light/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                        Seksi ini membahas keunikan arsitektur kebudayaan Jepang. Jepang dikenal secara global sebagai negara terdepan dalam teknologi modern, namun tetap memelihara dan menghormati tradisi leluhurnya dengan ketat. Perpaduan harmonis antara dua dimensi ini menciptakan lanskap sosial yang tidak ditemukan di tempat lain: kuil bersejarah kayu berdiri berdampingan dengan pencakar langit bertingkat tinggi.
+                    </p>
+                </section>
+
+                <!-- Dynamic Comparison Spectrum Chart & Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                    
+                    <!-- Chart Block: Traditional vs Modern Balance -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold mb-1">
+                                Spektrum Dualitas Budaya Jepang
+                            </h4>
+                            <p class="text-[11px] sm:text-xs text-celestial-muted mb-3">
+                                Perbandingan persentase keseimbangan antara elemen tradisional dan inovasi modern dalam berbagai aspek kehidupan.
+                            </p>
+                        </div>
+
+                        <!-- Chart Container meeting prompt constraints -->
+                        <div class="chart-container relative w-full max-w-xl mx-auto h-[250px] sm:h-[290px]">
+                            <canvas id="dualityChart"></canvas>
+                        </div>
+
+                        <p class="text-[11px] text-center text-celestial-muted mt-2 italic">
+                            Batang menunjukkan keharmonisan 50:50 antara nilai lama dan baru.
+                        </p>
+                    </div>
+
+                    <!-- Interactive Dual Column Card -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 space-y-4">
+                        <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold">
+                            Komparasi Manifestasi Spasial
+                        </h4>
+
+                        <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 text-xs">
+                            <!-- Traditional Column -->
+                            <div class="p-3 rounded-lg bg-celestial-night/70 border border-celestial-gold/30 space-y-2">
+                                <div class="font-bold text-celestial-brightGold border-b border-celestial-gold/20 pb-1 flex items-center gap-1">
+                                    <span>⛩️</span> Tradisional
+                                </div>
+                                <ul class="space-y-1.5 text-celestial-light/80 text-[11px] sm:text-xs">
+                                    <li>• <strong>Hanami:</strong> Pesta mekar sakura.</li>
+                                    <li>• <strong>Matsuri:</strong> Festival perayaan lokal.</li>
+                                    <li>• <strong>Kimono:</strong> Busana tradisional.</li>
+                                    <li>• <strong>Chado:</strong> Ritual minum teh.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Modern Column -->
+                            <div class="p-3 rounded-lg bg-celestial-night/70 border border-celestial-amber/30 space-y-2">
+                                <div class="font-bold text-celestial-amber border-b border-celestial-amber/20 pb-1 flex items-center gap-1">
+                                    <span>🏙️</span> Modern Futuristik
+                                </div>
+                                <ul class="space-y-1.5 text-celestial-light/80 text-[11px] sm:text-xs">
+                                    <li>• <strong>Gedung Tinggi:</strong> Pencakar langit.</li>
+                                    <li>• <strong>Shinkansen:</strong> Kereta cepat.</li>
+                                    <li>• <strong>Akihabara:</strong> Pop-culture hub.</li>
+                                    <li>• <strong>Vending:</strong> Otomatisasi publik.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-celestial-card border border-celestial-gold/20 text-[11px] sm:text-xs text-celestial-muted leading-relaxed">
+                            💡 <strong>Insight Penulis:</strong> Perpaduan harmonis inilah yang membuat eksplorasi Jepang tidak pernah membosankan, karena tradisi kuno dan teknologi masa depan saling menguatkan.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 4: DESTINASI, MUSIM & KULINER ================= -->
+            <div id="tab-travel" class="tab-content space-y-6 sm:space-y-8">
+                
+                <!-- Section Introduction Paragraph -->
+                <section class="jaadugar-card rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-celestial-gold flex items-center gap-2 mb-2.5">
+                        <span>🗺️</span> Rencana Petualangan: Destinasi Impian, Musim & Kuliner
+                    </h3>
+                    <p class="text-celestial-light/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                        Seksi interaktif ini merangkum impian eksplorasi spasial dan indrawi secara langsung jika berkesempatan berkunjung ke Jepang. Pilih kota favorit (Tokyo, Kyoto, Osaka, Sapporo) dan telusuri dinamika 4 musim (Haru, Natsu, Aki, Fuyu) serta kelengkapan *bucket list* kuliner impian Anda!
+                    </p>
+                </section>
+
+                <!-- City Selector Interactive Showcase (Expanded to 4 major hubs) -->
+                <div class="jaadugar-card rounded-xl p-4 sm:p-6 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-celestial-gold/20 pb-3">
+                        <h4 class="text-base sm:text-lg font-serif font-bold text-celestial-gold">
+                            Fokus Metropolit & Kota Historis
+                        </h4>
+                        
+                        <!-- Responsive City Buttons -->
+                        <div class="grid grid-cols-2 xs:flex flex-wrap gap-1.5">
+                            <button onclick="toggleCity('tokyo')" id="btn-tokyo" class="px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-gold text-celestial-deep text-center">
+                                🗼 Tokyo
+                            </button>
+                            <button onclick="toggleCity('kyoto')" id="btn-kyoto" class="px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-night text-celestial-light border border-celestial-gold/30 text-center">
+                                ⛩️ Kyoto
+                            </button>
+                            <button onclick="toggleCity('osaka')" id="btn-osaka" class="px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-night text-celestial-light border border-celestial-gold/30 text-center">
+                                🐙 Osaka
+                            </button>
+                            <button onclick="toggleCity('sapporo')" id="btn-sapporo" class="px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-night text-celestial-light border border-celestial-gold/30 text-center">
+                                ❄️ Sapporo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic City Display -->
+                    <div id="cityDetailBox" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Interactive Season Selector & Dynamic Seasonal Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                    
+                    <!-- Season Selector Box -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold mb-1">
+                                Eksplorasi Empat Musim (Shiki)
+                            </h4>
+                            <p class="text-[11px] sm:text-xs text-celestial-muted mb-3">
+                                Klik musim di bawah untuk melihat karakteristik cuaca dan atraksi utamanya:
+                            </p>
+
+                            <!-- Season Tabs -->
+                            <div class="grid grid-cols-2 xs:grid-cols-4 gap-2 mb-4">
+                                <button onclick="changeSeason('haru')" id="s-btn-haru" class="p-2 rounded-lg bg-celestial-gold text-celestial-deep text-xs font-bold text-center">🌸 Haru</button>
+                                <button onclick="changeSeason('natsu')" id="s-btn-natsu" class="p-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold text-center">🎆 Natsu</button>
+                                <button onclick="changeSeason('aki')" id="s-btn-aki" class="p-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold text-center">🍁 Aki</button>
+                                <button onclick="changeSeason('fuyu')" id="s-btn-fuyu" class="p-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold text-center">❄️ Fuyu</button>
+                            </div>
+
+                            <div id="seasonInfoBox" class="p-3.5 rounded-lg bg-celestial-night/80 border border-celestial-gold/30 space-y-2">
+                                <div id="seasonTitle" class="font-serif font-bold text-celestial-brightGold text-sm">Musim Semi (Haru - 春)</div>
+                                <p id="seasonDesc" class="text-xs text-celestial-light/90 leading-relaxed">Mekarnya bunga sakura di seluruh penjuru negeri, suhu sejuk 12°C-18°C, serta tradisi Hanami berkumpul di taman kota.</p>
+                                <div id="seasonFood" class="text-[11px] text-celestial-amber">🍡 Special Food: Sakura Mochi & Strawberry Daifuku</div>
+                            </div>
+                        </div>
+
+                        <div class="text-[11px] text-celestial-muted italic pt-1">
+                            *Setiap musim memiliki ritual festival dan nuansa visual yang unik di layar sinematografi.
+                        </div>
+                    </div>
+
+                    <!-- Chart Block: Seasonal Cultural Vibrancy -->
+                    <div class="jaadugar-card rounded-xl p-4 sm:p-5 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm sm:text-md font-serif font-bold text-celestial-gold mb-1">
+                                Grafik Daya Tarik Kultural Per Musim
+                            </h4>
+                            <p class="text-[11px] sm:text-xs text-celestial-muted mb-2">
+                                Perbandingan intensitas festival, estetika alam, kelezatan kuliner, dan kenyamanan cuaca.
+                            </p>
+                        </div>
+
+                        <!-- Chart Container meeting prompt constraints -->
+                        <div class="chart-container relative w-full max-w-xl mx-auto h-[240px] sm:h-[280px]">
+                            <canvas id="seasonalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Culinary & Bucket List Checklist with Live Progress Bar & LocalStorage -->
+                <div class="jaadugar-card rounded-xl p-4 sm:p-6 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="text-base sm:text-lg font-serif font-bold text-celestial-gold">
+                                Checklist Pengalaman Indrawi & Kuliner Impian
+                            </h4>
+                            <p class="text-[11px] sm:text-xs text-celestial-muted">
+                                Tandai hal yang ingin dicoba (terkoneksi otomatis dengan memori browser Anda):
+                            </p>
+                        </div>
+                        
+                        <!-- Progress Meter -->
+                        <div class="w-full sm:w-60 bg-celestial-night p-3 rounded-xl border border-celestial-gold/30">
+                            <div class="flex justify-between text-xs font-bold text-celestial-gold mb-1">
+                                <span>Progress Kesiapan:</span>
+                                <span id="progressText">0%</span>
+                            </div>
+                            <div class="w-full bg-celestial-deep rounded-full h-2.5 overflow-hidden">
+                                <div id="progressBar" class="bg-gradient-to-r from-celestial-amber to-celestial-brightGold h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checklist Items Grid -->
+                    <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2.5">
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-0" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🍱 Sushi Otentik Segar</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-1" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🍜 Ramen Kuah Gurih</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-2" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🐙 Takoyaki Panas Festival</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-3" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🍡 Dango & Matcha</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-4" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🌃 Jalan Malam Tokyo</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-5" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">⛩️ Zen Garden Kyoto</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-6" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🌸 Hanami Musim Semi</span>
+                        </label>
+                        <label class="p-2.5 rounded-lg bg-celestial-night/60 border border-celestial-gold/20 flex items-center space-x-2.5 cursor-pointer hover:bg-celestial-night">
+                            <input type="checkbox" id="chk-7" onchange="updateProgress()" class="bucket-check rounded text-celestial-brightGold focus:ring-0">
+                            <span class="text-xs text-celestial-light">🥋 Memakai Yukata</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 5: REFLEKSI KOSMIK & PENUTUP ================= -->
+            <div id="tab-reflection" class="tab-content space-y-6 sm:space-y-8">
+                
+                <!-- Section Introduction Paragraph -->
+                <section class="jaadugar-card rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-serif font-bold text-celestial-gold flex items-center gap-2 mb-2.5">
+                        <span>📜</span> Penutup Naratif: Refleksi Pengalaman Transkultural
+                    </h3>
+                    <p class="text-celestial-light/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                        Seksi penutup ini menyintesis seluruh rangkaian eksplorasi. Jepang bagi penulis bukan lagi sekadar tentang media anime semata. Anime memang menjadi titik awal dari tumbuhnya ketertarikan ini, tetapi kekayaan budaya, keindahan bahasa, kelezatan makanan, sejarah yang panjang, serta atmosfer ruangnya telah membuat rasa penasaran berkembang menjadi apresiasi yang matang.
+                    </p>
+                </section>
+
+                <!-- Interactive Celestial Astrolabe Widget inspired by Sitara (Jaadugar) -->
+                <div class="jaadugar-card-gold rounded-xl p-5 sm:p-8 text-center space-y-5">
+                    <h4 class="text-lg sm:text-xl font-serif font-bold text-celestial-brightGold">
+                        Astrolabe Kosmik Interaktif (Touch / Drag Rotate)
+                    </h4>
+                    <p class="text-xs text-celestial-muted max-w-lg mx-auto">
+                        Representasi visual manuskrip Euclid & bintang Sitara dari anime <em>Tenmaku no Jaadugar</em>. Geser kursor atau sentuh lingkaran di bawah ini untuk memutar roda kosmik!
+                    </p>
+
+                    <!-- HTML5 Interactive Astrolabe Canvas Visualizer -->
+                    <div class="relative w-full max-w-[260px] mx-auto h-64 flex items-center justify-center">
+                        <canvas id="astrolabeCanvas" width="260" height="260" class="cursor-grab active:cursor-grabbing touch-none"></canvas>
+                    </div>
+
+                    <div class="gold-ornament-line my-4"></div>
+
+                    <!-- Final Farewell Message -->
+                    <div class="space-y-2.5">
+                        <p class="text-xs sm:text-sm md:text-base text-celestial-light italic max-w-xl mx-auto">
+                            "Semoga suatu hari nanti saya dapat benar-benar menginjakkan kaki di Jepang dan menyaksikan secara langsung tempat-tempat indah yang selama ini hanya bisa saya nikmati melalui layar kaca."
+                        </p>
+                        <div class="text-xl sm:text-3xl font-bold font-serif text-celestial-brightGold tracking-wider gold-text-glow pt-2">
+                            じゃあ、またね！ (Jaa, mata ne!) 🇯🇵✨
+                        </div>
+                        <div class="text-[11px] sm:text-xs text-celestial-muted">
+                            (Sampai jumpa lagi di bawah langit bintang yang sama!)
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="jaadugar-card border-t border-celestial-gold/30 mt-auto py-5 px-4 text-center text-xs text-celestial-muted space-y-2">
+            <div class="gold-ornament-line max-w-md mx-auto mb-3"></div>
+            <p>
+                © 2026 Blog Apresiasi Budaya Jepang & Estetika Langit Celestial. Inspired by <em>Tenmaku no Jaadugar</em>.
+            </p>
+            <p class="text-celestial-gold/70 text-[11px]">
+                Single Page Application (SPA) - Fully Responsive for Mobile & Desktop. Tailwind CSS, Chart.js & HTML5 Canvas.
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- JavaScript Logic & Chart Setup -->
+    <script>
+        /* ================= 1. STARFIELD CANVAS ANIMATION (NO SVG) ================= */
+        const skyCanvas = document.getElementById('skyCanvas');
+        const ctx = skyCanvas.getContext('2d');
+
+        let stars = [];
+        let numStars = window.innerWidth < 640 ? 80 : 150;
+
+        function resizeCanvas() {
+            skyCanvas.width = window.innerWidth;
+            skyCanvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * skyCanvas.width,
+                    y: Math.random() * skyCanvas.height,
+                    radius: Math.random() * 1.6 + 0.3,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.012 + 0.004,
+                    color: Math.random() > 0.3 ? '#F8F9FA' : (Math.random() > 0.5 ? '#E9C46A' : '#FFB703')
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, skyCanvas.width, skyCanvas.height);
+            
+            // Subtle Radial Gradient Background
+            let bgGradient = ctx.createRadialGradient(
+                skyCanvas.width / 2, skyCanvas.height / 3, 50,
+                skyCanvas.width / 2, skyCanvas.height / 2, Math.max(skyCanvas.width, skyCanvas.height)
+            );
+            bgGradient.addColorStop(0, '#16213E');
+            bgGradient.addColorStop(1, '#0B1021');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, skyCanvas.width, skyCanvas.height);
+
+            // Draw individual twinkling stars
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.globalAlpha = Math.max(0.1, Math.min(1, star.alpha));
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawStars();
+
+        function adjustStarDensity(type) {
+            numStars = type === 'high' ? (window.innerWidth < 640 ? 160 : 260) : 60;
+            initStars();
+        }
+
+        /* ================= 2. MOBILE MENU & TAB SWITCHING LOGIC ================= */
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobileDrawer');
+            const btn = document.getElementById('hamburgerBtn');
+            drawer.classList.toggle('hidden');
+            btn.classList.toggle('menu-open');
+        }
+
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Reset desktop navigation active styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-celestial-gold', 'text-celestial-deep', 'font-bold', 'shadow-md');
+                btn.classList.add('hover:bg-celestial-gold/20', 'text-celestial-light');
+            });
+
+            // Reset mobile navigation styles
+            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+                btn.classList.remove('bg-celestial-gold', 'text-celestial-deep');
+                btn.classList.add('hover:bg-celestial-night', 'text-celestial-light');
+            });
+
+            // Activate target tab
+            const targetContent = document.getElementById('tab-' + tabId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            // Highlight target button Desktop
+            const targetNav = document.getElementById('nav-' + tabId);
+            if (targetNav) {
+                targetNav.classList.remove('hover:bg-celestial-gold/20', 'text-celestial-light');
+                targetNav.classList.add('bg-celestial-gold', 'text-celestial-deep', 'font-bold', 'shadow-md');
+            }
+
+            // Highlight target button Mobile
+            const targetMobNav = document.getElementById('mob-nav-' + tabId);
+            if (targetMobNav) {
+                targetMobNav.classList.remove('hover:bg-celestial-night', 'text-celestial-light');
+                targetMobNav.classList.add('bg-celestial-gold', 'text-celestial-deep');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ================= 3. ATMOSPHERE EXPERIENCE SWITCHER & WAVE CANVAS ================= */
+        const atmosphereData = {
+            night: {
+                icon: "🏙️",
+                badge: "Vibe: Night Cityscape",
+                title: "Pencahayaan Neon & Keheningan Malam",
+                desc: "Pantulan lampu neon pada aspal basah, gemerlap papan reklame tinggi, serta sunyinya gang-gang kecil di Tokyo menciptakan kontras visual yang memikat dan memicu imajinasi eksplorasi malam.",
+                quote: "\"Pemandangan jalanan Jepang pada malam hari mampu menghadirkan perenungan mendalam mengenai dinamika kota dan keheningan pribadi.\"",
+                waveFreq: 0.05,
+                waveAmp: 18
+            },
+            rain: {
+                icon: "🌧️",
+                badge: "Vibe: Residential Rain",
+                title: "Derai Suara Hujan di Pemukiman",
+                desc: "Suara rintik hujan yang jatuh di atas atap rumah tradisional kayu dan perumahan tenang, dipadu dengan pantulan genangan air di jalan setapak pemukiman.",
+                quote: "\"Derai suara hujan yang jatuh di pemukiman terasa begitu hidup dan nyata, menghadirkan ketenangan emosional.\"",
+                waveFreq: 0.12,
+                waveAmp: 25
+            },
+            school: {
+                icon: "🏫",
+                badge: "Vibe: Nostalgic Sunset School",
+                title: "Suasana Keheningan Sekolah",
+                desc: "Cahaya senja kemerahan yang menerobos jendela ruang kelas kosong, dengungan kipas angin, dan deretan meja kayu yang membawa nostalgia masa muda.",
+                quote: "\"Keheningan suasana sekolah dapat menggambarkan kompleksitas hubungan antarmanusia dan perkembangan karakter.\"",
+                waveFreq: 0.02,
+                waveAmp: 10
+            },
+            temple: {
+                icon: "⛩️",
+                badge: "Vibe: Sacred Serenity",
+                title: "Kedamaian Kuil & Hutan Bambu Kyoto",
+                desc: "Aroma kayu tua, ketenangan taman batu Zen, serta lambaian dedaunan pohon mapel di area kompleks kuil bersejarah yang sarat makna tradisi.",
+                quote: "\"Di satu sisi berdiri kuil-kuil bersejarah dan bangunan kayu tradisional, menjaga akar tradisi di tengah zaman modern.\"",
+                waveFreq: 0.03,
+                waveAmp: 12
+            }
+        };
+
+        let currentWaveFreq = 0.05;
+        let currentWaveAmp = 18;
+        let waveStep = 0;
+
+        function changeAtmosphere(key) {
+            const data = atmosphereData[key];
+            if (!data) return;
+
+            document.getElementById('atmoIcon').innerText = data.icon;
+            document.getElementById('atmoBadge').innerText = data.badge;
+            document.getElementById('atmoTitle').innerText = data.title;
+            document.getElementById('atmoDesc').innerText = data.desc;
+            document.getElementById('atmoQuote').innerText = data.quote;
+
+            currentWaveFreq = data.waveFreq;
+            currentWaveAmp = data.waveAmp;
+
+            // Update button styles
+            document.querySelectorAll('.atmo-btn').forEach(btn => {
+                btn.classList.remove('bg-celestial-gold', 'text-celestial-deep');
+                btn.classList.add('bg-celestial-night', 'text-celestial-light');
+            });
+            const activeBtn = document.getElementById('atmo-btn-' + key);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-celestial-night', 'text-celestial-light');
+                activeBtn.classList.add('bg-celestial-gold', 'text-celestial-deep');
+            }
+        }
+
+        // Animated Soundwave Canvas
+        const waveCanvas = document.getElementById('waveCanvas');
+        if (waveCanvas) {
+            const wctx = waveCanvas.getContext('2d');
+            function animateWave() {
+                waveCanvas.width = waveCanvas.parentElement.clientWidth;
+                waveCanvas.height = waveCanvas.parentElement.clientHeight;
+                wctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+                wctx.beginPath();
+                wctx.lineWidth = 2;
+                wctx.strokeStyle = '#E9C46A';
+
+                const cy = waveCanvas.height / 2;
+                for (let x = 0; x < waveCanvas.width; x++) {
+                    const y = cy + Math.sin(x * currentWaveFreq + waveStep) * currentWaveAmp * Math.sin(x * 0.01);
+                    if (x === 0) wctx.moveTo(x, y);
+                    else wctx.lineTo(x, y);
+                }
+                wctx.stroke();
+
+                waveStep += 0.06;
+                requestAnimationFrame(animateWave);
+            }
+            animateWave();
+        }
+
+        /* ================= 4. CITY EXPLORER DATA & SWITCHER ================= */
+        const cityData = {
+            tokyo: [
+                { icon: '🌃', title: 'Pusat Neon Shibuya', desc: 'Menikmati gemerlap papan reklame raksasa dan gedung bertingkat tinggi di malam hari.' },
+                { icon: '🗼', title: 'Tokyo Tower & Skytree', desc: 'Melihat panorama metropolis dari puncak menara ikonik penanda zaman modern.' },
+                { icon: '🍜', title: 'Kedai Ramen Akihabara', desc: 'Mencicipi semangkuk ramen panas otentik di sela-sela pusat eksplorasi kultur pop.' }
+            ],
+            kyoto: [
+                { icon: '⛩️', title: 'Fushimi Inari Taisha', desc: 'Menjelajahi ribuan gerbang Torii merah yang membelah lereng gunung yang hening.' },
+                { icon: '🍵', title: 'Upacara Teh Gion', desc: 'Merasakan tradisi Chado dan ketenangan di kedai kayu tradisional distrik tua.' },
+                { icon: '🌸', title: 'Kuil Kiyomizudera', desc: 'Pemandangan teras kayu legendaris yang dikelilingi rindangnya pohon sakura dan mapel.' }
+            ],
+            osaka: [
+                { icon: '🐙', title: 'Kuliner Dotonbori', desc: 'Pusat street-food dunia: Takoyaki panas renyah dan Okonomiyaki gurih.' },
+                { icon: '🏯', title: 'Istana Osaka', desc: 'Kemegahan benteng era feodal yang dikelilingi parit air dan taman bunga megah.' },
+                { icon: '🛍️', title: 'Distrik Shinsaibashi', desc: 'Pusat belanja modern dengan energi masyarakat lokal yang ramah dan dinamis.' }
+            ],
+            sapporo: [
+                { icon: '❄️', title: 'Festival Salju Odori', desc: 'Pameran patung es dan salju raksasa kelas dunia di jantung kota Hokkaido.' },
+                { icon: '🍜', title: 'Miso Ramen Hokkaido', desc: 'Ramen khas utara bertabur jagung manis dan mentega gurih pelepas dingin.' },
+                { icon: '🏔️', title: 'Lanskap Gunung Moiwa', desc: 'Menikmati pemandangan bintang malam kota Sapporo yang bersalju dari kereta gantung.' }
+            ]
+        };
+
+        function toggleCity(cityKey) {
+            const container = document.getElementById('cityDetailBox');
+            const data = cityData[cityKey];
+            if (!data || !container) return;
+
+            // Reset city buttons
+            ['tokyo', 'kyoto', 'osaka', 'sapporo'].forEach(c => {
+                const b = document.getElementById('btn-' + c);
+                if (b) {
+                    b.className = c === cityKey 
+                        ? "px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-gold text-celestial-deep text-center" 
+                        : "px-3 py-1.5 rounded-full text-xs font-bold bg-celestial-night text-celestial-light border border-celestial-gold/30 text-center";
+                }
+            });
+
+            container.innerHTML = data.map(item => `
+                <div class="p-3.5 rounded-xl bg-celestial-night/80 border border-celestial-gold/30 space-y-1.5">
+                    <div class="text-2xl">${item.icon}</div>
+                    <h5 class="font-serif font-bold text-celestial-brightGold text-xs sm:text-sm">${item.title}</h5>
+                    <p class="text-[11px] sm:text-xs text-celestial-muted leading-relaxed">${item.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        /* ================= 5. SEASON SELECTOR LOGIC ================= */
+        const seasonData = {
+            haru: {
+                title: "Musim Semi (Haru - 春)",
+                desc: "Mekarnya bunga sakura di seluruh penjuru negeri, suhu sejuk 12°C-18°C, serta tradisi Hanami berkumpul di taman kota.",
+                food: "🍡 Special Food: Sakura Mochi & Strawberry Daifuku"
+            },
+            natsu: {
+                title: "Musim Panas (Natsu - 夏)",
+                desc: "Festival Matsuri dengan kembang api malam hari (Hanabi), pemakaian baju Yukata ringan, dan dengungan jangkrik di desa.",
+                food: "🍧 Special Food: Kakigori (Es Serut) & Unagi Don"
+            },
+            aki: {
+                title: "Musim Gugur (Aki - 秋)",
+                desc: "Daun mapel memerah indah (Momiji), udara bersih nyaman 15°C, dan momen panen raya yang sarat tradisi rasa syukur.",
+                food: "🌰 Special Food: Kurigohan (Nasi Kastanye) & Sanma Bakar"
+            },
+            fuyu: {
+                title: "Musim Dingin (Fuyu - 冬)",
+                desc: "Hujan salju putih lembut, pemandian air panas alami (Onsen) di pegunungan, serta keheningan malam berselimut es.",
+                food: "🍲 Special Food: Nabe Hotpot & Oden Panas Kedai Yatai"
+            }
+        };
+
+        function changeSeason(key) {
+            const data = seasonData[key];
+            if (!data) return;
+
+            document.getElementById('seasonTitle').innerText = data.title;
+            document.getElementById('seasonDesc').innerText = data.desc;
+            document.getElementById('seasonFood').innerText = data.food;
+
+            ['haru', 'natsu', 'aki', 'fuyu'].forEach(s => {
+                const b = document.getElementById('s-btn-' + s);
+                if (b) {
+                    b.className = s === key
+                        ? "p-2 rounded-lg bg-celestial-gold text-celestial-deep text-xs font-bold text-center"
+                        : "p-2 rounded-lg bg-celestial-night text-celestial-light border border-celestial-gold/30 text-xs font-bold text-center";
+                }
+            });
+        }
+
+        /* ================= 6. BUCKET LIST PROGRESS & LOCALSTORAGE ================= */
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.bucket-check');
+            let checkedCount = 0;
+            const savedState = [];
+
+            checkboxes.forEach((cb, index) => {
+                if (cb.checked) {
+                    checkedCount++;
+                    savedState.push(index);
+                }
+            });
+
+            const percentage = Math.round((checkedCount / checkboxes.length) * 100);
+            document.getElementById('progressText').innerText = percentage + '%';
+            document.getElementById('progressBar').style.width = percentage + '%';
+
+            // Save to LocalStorage
+            try {
+                localStorage.setItem('japan_bucket_list', JSON.stringify(savedState));
+            } catch(e) {}
+        }
+
+        function loadSavedBucketList() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('japan_bucket_list'));
+                if (Array.isArray(saved)) {
+                    saved.forEach(index => {
+                        const cb = document.getElementById('chk-' + index);
+                        if (cb) cb.checked = true;
+                    });
+                }
+            } catch(e) {}
+            updateProgress();
+        }
+
+        /* ================= 7. ASTROLABE INTERACTIVE CANVAS (JAADUGAR MOTIF) ================= */
+        const astroCanvas = document.getElementById('astrolabeCanvas');
+        if (astroCanvas) {
+            const actx = astroCanvas.getContext('2d');
+            let angle = 0;
+            let isDragging = false;
+            let lastX = 0;
+
+            function drawAstrolabe() {
+                actx.clearRect(0, 0, astroCanvas.width, astroCanvas.height);
+                const cx = astroCanvas.width / 2;
+                const cy = astroCanvas.height / 2;
+
+                // Outer Ring
+                actx.beginPath();
+                actx.arc(cx, cy, 110, 0, Math.PI * 2);
+                actx.strokeStyle = '#E9C46A';
+                actx.lineWidth = 2.5;
+                actx.stroke();
+
+                // Inner Rotating Ring
+                actx.save();
+                actx.translate(cx, cy);
+                actx.rotate(angle);
+
+                actx.beginPath();
+                actx.arc(0, 0, 85, 0, Math.PI * 2);
+                actx.strokeStyle = 'rgba(255, 183, 3, 0.7)';
+                actx.setLineDash([6, 4]);
+                actx.stroke();
+                actx.setLineDash([]);
+
+                // Triangular Astrolabe Pointers
+                for (let i = 0; i < 6; i++) {
+                    let rot = (i * Math.PI) / 3;
+                    actx.rotate(rot);
+                    actx.beginPath();
+                    actx.moveTo(0, -85);
+                    actx.lineTo(7, -70);
+                    actx.lineTo(-7, -70);
+                    actx.closePath();
+                    actx.fillStyle = '#E9C46A';
+                    actx.fill();
+                }
+
+                actx.restore();
+
+                // Center Core Star
+                actx.beginPath();
+                actx.arc(cx, cy, 10, 0, Math.PI * 2);
+                actx.fillStyle = '#FFB703';
+                actx.fill();
+
+                if (!isDragging) {
+                    angle += 0.006;
+                }
+                requestAnimationFrame(drawAstrolabe);
+            }
+            drawAstrolabe();
+
+            // Touch & Mouse Drag Rotation Interaction
+            function startDrag(e) {
+                isDragging = true;
+                lastX = e.touches ? e.touches[0].clientX : e.clientX;
+            }
+            function moveDrag(e) {
+                if (!isDragging) return;
+                const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                const deltaX = currentX - lastX;
+                angle += deltaX * 0.02;
+                lastX = currentX;
+            }
+            function stopDrag() {
+                isDragging = false;
+            }
+
+            astroCanvas.addEventListener('mousedown', startDrag);
+            window.addEventListener('mousemove', moveDrag);
+            window.addEventListener('mouseup', stopDrag);
+
+            astroCanvas.addEventListener('touchstart', startDrag, { passive: true });
+            window.addEventListener('touchmove', moveDrag, { passive: true });
+            window.addEventListener('touchend', stopDrag);
+        }
+
+        /* ================= 8. CHART.JS INITIALIZATIONS ================= */
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Utility function for 16-char label truncation in tooltips (Fixed execution)
+            function formatLabel(str) {
+                if (!str) return '';
+                return str.length > 16 ? str.substring(0, 14) + '..' : str;
+            }
+
+            // Initialize City default
+            toggleCity('tokyo');
+
+            // Initialize Saved Bucket List
+            loadSavedBucketList();
+
+            // Chart 1: Anime Gateway Donut Chart
+            const ctx1 = document.getElementById('animeGatewayChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tata Bahasa & Ojigi', 'Kuliner & Bento', 'Destinasi & Ruang', 'Kultural & Musim'],
+                    datasets: [{
+                        data: [25, 20, 30, 25],
+                        backgroundColor: [
+                            '#E9C46A',
+                            '#F4A261',
+                            '#FFB703',
+                            '#2A9D8F'
+                        ],
+                        borderColor: '#1B263B',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#F8F9FA',
+                                font: { size: 10 },
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatLabel(context.label) + ': ' + context.raw + '% pengaruh';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Duality Stacked Bar Chart
+            const ctx2 = document.getElementById('dualityChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Arsitektur', 'Seni & Busana', 'Gaya Hidup', 'Teknologi'],
+                    datasets: [
+                        {
+                            label: 'Elemen Tradisional',
+                            data: [50, 60, 45, 20],
+                            backgroundColor: '#E9C46A'
+                        },
+                        {
+                            label: 'Inovasi Modern',
+                            data: [50, 40, 55, 80],
+                            backgroundColor: '#FFB703'
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { color: '#8D99AE', font: { size: 10 } },
+                            grid: { color: 'rgba(233, 196, 106, 0.1)' }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { 
+                                color: '#F8F9FA',
+                                font: { size: 10 },
+                                callback: function(val, index) {
+                                    return formatLabel(this.getLabelForValue(val));
+                                }
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#F8F9FA', font: { size: 10 }, boxWidth: 12 }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3 (NEW Update): Seasonal Cultural Vibrancy Radar Chart
+            const ctx3 = document.getElementById('seasonalChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'radar',
+                data: {
+                    labels: ['Festival', 'Alam', 'Kuliner', 'Cuaca Sejuk'],
+                    datasets: [
+                        {
+                            label: 'Haru (Semi)',
+                            data: [85, 95, 80, 90],
+                            borderColor: '#E9C46A',
+                            backgroundColor: 'rgba(233, 196, 106, 0.25)',
+                            borderWidth: 1.5
+                        },
+                        {
+                            label: 'Aki (Gugur)',
+                            data: [75, 90, 95, 85],
+                            borderColor: '#F4A261',
+                            backgroundColor: 'rgba(244, 162, 97, 0.25)',
+                            borderWidth: 1.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(233, 196, 106, 0.2)' },
+                            grid: { color: 'rgba(233, 196, 106, 0.15)' },
+                            pointLabels: { color: '#F8F9FA', font: { size: 9 } },
+                            ticks: { display: false, backdropColor: 'transparent' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#F8F9FA', font: { size: 10 }, boxWidth: 10 }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
